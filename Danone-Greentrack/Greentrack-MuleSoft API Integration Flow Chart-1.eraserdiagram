@@ -1,0 +1,72 @@
+flowchart-diagram
+
+title MuleSoft API Integration Flow Chart
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+}
+
+
+LeftColumn  [label: "Left Column", color: grey] {
+  UL360 {
+  UL360_Push [label: "Push Model Trigger", shape: oval, icon: bell]
+  UL360_Poll [label: "Pull Model Trigger", shape: oval, icon: calendar]
+  UL360_API [label: "Expose Authenticated UL360 API", shape: rectangle, icon: server]
+}
+  MuleSoft_Input  [label: "MuleSoft Input", color: lightgreen] {
+    Mule_Inbound [label: "Receive JSON Payload", shape: rectangle, icon: file-text]
+    Auth_Verification [label: "Authentication Verification", shape: rectangle, icon: lock]
+    Auth_Check [label: "Is Auth Valid?", shape: diamond, icon: alert_triangle]
+    DataWeave_Trans [label: "DataWeave Transformation", shape: rectangle, icon: code]
+    Validation_Enrich [label: "Validation & Enrichment", shape: rectangle, icon: check_square]
+    Data_Valid [label: "Is Data Valid?", shape: diamond, icon: help_circle]
+  }
+}
+RightColumn  [label: "Right Column", color: grey] {
+  MuleSoft_Output  [label: "MuleSoft Output", color: lightgreen] {
+    Error_Handler [label: "Error Handling (Try/Catch)", shape: rectangle, icon: x_square]
+    Reprocess_Queue [label: "Queue for Reprocessing (DLQ)", shape: rectangle, icon: repeat]
+    Logging_Mon [label: "Logging & Monitoring", shape: rectangle, icon: activity]
+    Mule_Outbound [label: "Outbound Mule Flow", shape: rectangle, icon: upload]
+  }
+  OneSource {
+  OS_Connector [label: "Outbound Connector (REST/JDBC)", shape: rectangle, icon: share]
+  OS_Upsert [label: "Upsert Record", shape: rectangle, icon: database]
+  OS_Response [label: "Response Handling & Error Propagation", shape: rectangle, icon: repeat]
+  OS_Governance [label: "Data Governance & Policies", shape: rectangle, icon: shield]
+  OS_End [label: "Integration Complete", shape: oval]
+}
+}
+
+UL360_Push > UL360_API: "Push Data"
+UL360_Poll > UL360_API: "Poll Request"
+
+UL360_API > Mule_Inbound: "Forward JSON Payload"
+Mule_Inbound > Auth_Verification: "Token Verification"
+Auth_Verification > Auth_Check: "Auth Result"
+Auth_Check > DataWeave_Trans: "Yes"
+Auth_Check > Error_Handler: "No (Auth Fail)"
+DataWeave_Trans > Validation_Enrich: "Transform Data"
+Validation_Enrich > Data_Valid: "Enrich & Validate"
+Data_Valid > Logging_Mon: "Valid Data"
+Data_Valid > Error_Handler: "Invalid Data"
+Error_Handler > Reprocess_Queue: "Queue Error"
+Reprocess_Queue > Logging_Mon: "Log Error"
+Logging_Mon > Mule_Outbound: "Proceed to Outbound"
+Mule_Outbound > OS_Connector: "Outbound Call"
+OS_Connector > OS_Upsert: "Upsert Record"
+OS_Upsert > OS_Response: "Process Response"
+OS_Response > OS_Governance: "Apply Data Governance"
+OS_Governance > OS_End: "Complete Process"
+
